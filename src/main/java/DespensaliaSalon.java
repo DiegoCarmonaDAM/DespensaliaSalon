@@ -1,19 +1,31 @@
 import Entity.*;
+import Service.*;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Scanner;
 
 public class DespensaliaSalon {
-
     private static EntityManagerFactory emf =
             Persistence.createEntityManagerFactory("DespensaliaSalonPU");
-
     private static Scanner sc = new Scanner(System.in);
 
-    public static void main(String[] args) {
+    private static ClienteService clienteService;
+    private static ProductoService productoService;
+    private static PedidoService pedidoService;
 
+    public static void main(String[] args) {
         EntityManager em = emf.createEntityManager();
+
+        // Inicializar servicios
+        clienteService = new ClienteService(em);
+        productoService = new ProductoService(em);
+        pedidoService = new PedidoService(em, clienteService, productoService);
+
+        // Crear encargado si no existe
+        clienteService.crearEncargadoSiNoExiste();
 
         int opcion;
 
@@ -26,19 +38,18 @@ public class DespensaliaSalon {
             System.out.println("5. Borrar producto");
             System.out.println("6. Crear pedido");
             System.out.println("7. Listar pedidos (encargado)");
-
             System.out.println("0. Salir");
             System.out.print("Opción: ");
             opcion = Integer.parseInt(sc.nextLine());
 
             switch (opcion) {
-                case 1 -> altaCliente(em);
-                case 2 -> borrarCliente(em);
-                case 3 -> listarClientes(em);
-                case 4 -> altaProducto(em);
-                case 5 -> borrarProducto(em);
-                case 6 -> crearPedido(em);
-                case 7 -> listarPedidosEncargado(em);
+                case 1 -> menuAltaCliente();
+                case 2 -> menuBorrarCliente();
+                case 3 -> menuListarClientes();
+                case 4 -> menuAltaProducto();
+                case 5 -> menuBorrarProducto();
+                case 6 -> menuCrearPedido();
+                case 7 -> menuListarPedidosEncargado();
                 case 0 -> System.out.println("Saliendo...");
                 default -> System.out.println("Opción no válida");
             }
@@ -49,21 +60,11 @@ public class DespensaliaSalon {
         emf.close();
     }
 
-    // =======================
-    // 1. Alta Cliente
-    // =======================
-    private static void altaCliente(EntityManager em) {
+    private static void menuAltaCliente() {
         try {
             System.out.println("\n--- Alta Cliente ---");
             System.out.print("ID Cliente: ");
             String id = sc.nextLine();
-
-            // 🔎 Comprobar si ya existe
-            Cliente existente = em.find(Cliente.class, id);
-            if (existente != null) {
-                System.out.println("❌ Ya existe un cliente con ese ID.");
-                return;
-            }
 
             System.out.print("Password: ");
             String pass = sc.nextLine();
@@ -80,35 +81,53 @@ public class DespensaliaSalon {
             System.out.print("Email: ");
             String email = sc.nextLine();
 
-            Cliente c = new Cliente(id, pass, nombre, apellidos, tel, email);
-
-            em.getTransaction().begin();
-            em.persist(c);
-            em.getTransaction().commit();
-
+            clienteService.altaCliente(id, pass, nombre, apellidos, tel, email);
             System.out.println("✅ Cliente creado correctamente.");
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
-
-            System.out.println("Error al crear cliente: " + e.getMessage());
+            System.out.println("❌ Error: " + e.getMessage());
         }
     }
 
-    // =======================
-    // 2. Alta Producto
-    // =======================
-    private static void altaProducto(EntityManager em) {
+    private static void menuBorrarCliente() {
+        try {
+            System.out.println("\n--- Borrar Cliente ---");
+            System.out.print("ID Cliente a borrar: ");
+            String id = sc.nextLine();
+
+            clienteService.borrarCliente(id);
+            System.out.println("✅ Cliente borrado correctamente.");
+
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+    }
+
+    private static void menuListarClientes() {
+        System.out.println("\n--- LISTADO DE CLIENTES ---");
+
+        List<Cliente> clientes = clienteService.listarClientes();
+
+        if (clientes.isEmpty()) {
+            System.out.println("No hay clientes registrados.");
+            return;
+        }
+
+        for (Cliente c : clientes) {
+            System.out.println("ID: " + c.getIdCliente()
+                    + " | Nombre: " + c.getNombre()
+                    + " " + c.getApellidos()
+                    + " | Email: " + c.getEmail());
+        }
+    }
+
+    private static void menuAltaProducto() {
         try {
             System.out.println("\n--- Alta Producto ---");
 
             System.out.print("Nombre: ");
             String nombre = sc.nextLine();
 
-            // ============================
-            // Validación del tipo
-            // ============================
             String tipo;
             while (true) {
                 System.out.print("Tipo (ENTRANTE / PLATO / POSTRE): ");
@@ -130,26 +149,29 @@ public class DespensaliaSalon {
             System.out.print("Disponible (1 = sí, 0 = no): ");
             short disp = Short.parseShort(sc.nextLine());
 
-            Producto p = new Producto(nombre, tipo, desc, precio, disp);
-
-            em.getTransaction().begin();
-            em.persist(p);
-            em.getTransaction().commit();
-
-            System.out.println("✅ Producto creado con ID: " + p.getIdProducto());
+            Producto producto = productoService.altaProducto(nombre, tipo, desc, precio, disp);
+            System.out.println("✅ Producto creado con ID: " + producto.getIdProducto());
 
         } catch (Exception e) {
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
-
-            System.out.println("Error al crear producto: " + e.getMessage());
+            System.out.println("❌ Error: " + e.getMessage());
         }
     }
 
-    // =======================
-    // 3. Crear Pedido
-    // =======================
-    private static void crearPedido(EntityManager em) {
+    private static void menuBorrarProducto() {
+        try {
+            System.out.println("\n--- Borrar Producto ---");
+            System.out.print("ID Producto a borrar: ");
+            int id = Integer.parseInt(sc.nextLine());
+
+            productoService.borrarProducto(id);
+            System.out.println("✅ Producto borrado correctamente.");
+
+        } catch (Exception e) {
+            System.out.println("❌ Error: " + e.getMessage());
+        }
+    }
+
+    private static void menuCrearPedido() {
         try {
             System.out.println("\n--- Crear Pedido ---");
 
@@ -157,32 +179,18 @@ public class DespensaliaSalon {
             System.out.print("ID Cliente: ");
             String idCliente = sc.nextLine();
 
-            Cliente c = em.find(Cliente.class, idCliente);
-            if (c == null) {
-                System.out.println("Cliente no encontrado.");
-                return;
-            }
-
-            // Fecha reserva
+            // Fecha y hora
             System.out.print("Fecha reserva (yyyy-mm-dd): ");
-            String fecha = sc.nextLine();
+            LocalDate fecha = LocalDate.parse(sc.nextLine());
 
             System.out.print("Hora reserva (hh:mm): ");
-            String hora = sc.nextLine();
-
-            LocalDate ld = LocalDate.parse(fecha);
-            LocalTime lt = LocalTime.parse(hora);
-
-            Date fhReserva = Date.from(
-                    LocalDateTime.of(ld, lt)
-                            .atZone(ZoneId.systemDefault())
-                            .toInstant()
-            );
+            LocalTime hora = LocalTime.parse(sc.nextLine());
 
             System.out.print("Observaciones: ");
             String obs = sc.nextLine();
 
-            Pedido pedido = new Pedido(c, fhReserva, obs);
+            // Crear pedido
+            Pedido pedido = pedidoService.crearPedido(idCliente, fecha, hora, obs);
 
             // Añadir líneas
             boolean mas = true;
@@ -190,113 +198,27 @@ public class DespensaliaSalon {
                 System.out.print("ID Producto: ");
                 int idProd = Integer.parseInt(sc.nextLine());
 
-                Producto prod = em.find(Producto.class, idProd);
-                if (prod == null) {
-                    System.out.println("Producto no existe.");
-                    continue;
-                }
-
                 System.out.print("Cantidad: ");
                 short cantidad = Short.parseShort(sc.nextLine());
 
-                PedidoLinea linea = PedidoLinea.crearLinea(prod, cantidad);
-                pedido.addLinea(linea);
+                pedidoService.agregarLineaPedido(pedido, idProd, cantidad);
 
                 System.out.print("¿Añadir otro producto? (s/n): ");
                 mas = sc.nextLine().equalsIgnoreCase("s");
             }
 
-            em.getTransaction().begin();
-            em.persist(pedido);
-            em.getTransaction().commit();
+            // Guardar pedido
+            pedidoService.guardarPedido(pedido);
 
-            System.out.println("Pedido creado con ID: " + pedido.getIdPedido());
+            System.out.println("✅ Pedido creado con ID: " + pedido.getIdPedido());
             System.out.println("Importe total: " + pedido.getImporte() + " €");
 
         } catch (Exception e) {
-            em.getTransaction().rollback();
-            System.out.println("Error al crear pedido: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("❌ Error: " + e.getMessage());
         }
     }
 
-    // Listar clientes
-    private static void listarClientes(EntityManager em) {
-        System.out.println("\n--- LISTADO DE CLIENTES ---");
-
-        List<Cliente> clientes = em
-                .createQuery("SELECT c FROM Cliente c", Cliente.class)
-                .getResultList();
-
-        if (clientes.isEmpty()) {
-            System.out.println("No hay clientes registrados.");
-            return;
-        }
-
-        for (Cliente c : clientes) {
-            System.out.println("ID: " + c.getIdCliente()
-                    + " | Nombre: " + c.getNombre()
-                    + " " + c.getApellidos()
-                    + " | Email: " + c.getEmail());
-        }
-    }
-    // Borrar cliente
-    private static void borrarCliente(EntityManager em) {
-        try {
-            System.out.println("\n--- BORRAR CLIENTE ---");
-            System.out.print("ID Cliente a borrar: ");
-            String id = sc.nextLine();
-
-            Cliente c = em.find(Cliente.class, id);
-
-            if (c == null) {
-                System.out.println("❌ Cliente no encontrado.");
-                return;
-            }
-
-            em.getTransaction().begin();
-            em.remove(c);
-            em.getTransaction().commit();
-
-            System.out.println("✅ Cliente borrado correctamente.");
-
-        } catch (Exception e) {
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
-
-            System.out.println("Error al borrar cliente: " + e.getMessage());
-        }
-    }
-    // Borrar producto
-    private static void borrarProducto(EntityManager em) {
-        try {
-            System.out.println("\n--- BORRAR PRODUCTO ---");
-            System.out.print("ID Producto a borrar: ");
-            int id = Integer.parseInt(sc.nextLine());
-
-            Producto p = em.find(Producto.class, id);
-
-            if (p == null) {
-                System.out.println("❌ Producto no encontrado.");
-                return;
-            }
-
-            em.getTransaction().begin();
-            em.remove(p);
-            em.getTransaction().commit();
-
-            System.out.println("✅ Producto borrado correctamente.");
-
-        } catch (Exception e) {
-            if (em.getTransaction().isActive())
-                em.getTransaction().rollback();
-
-            System.out.println("Error al borrar producto: " + e.getMessage());
-        }
-    }
-
-    private static void listarPedidosEncargado(EntityManager em) {
-
+    private static void menuListarPedidosEncargado() {
         System.out.println("\n--- ACCESO ENCARGADO ---");
 
         System.out.print("ID Encargado: ");
@@ -305,47 +227,19 @@ public class DespensaliaSalon {
         System.out.print("Password: ");
         String pass = sc.nextLine();
 
-        // Buscar "encargado" como si fuera un cliente
-        Cliente encargado = em.find(Cliente.class, id);
-
-        if (encargado == null || !pass.equals("1234")) {
+        if (!pedidoService.validarAccesoEncargado(id, pass)) {
             System.out.println("❌ Acceso denegado.");
             return;
         }
 
         System.out.println("✅ Acceso concedido. Listando pedidos del día...");
 
-        // =============================
-        // Calcular rango de hoy hasta 17:00
-        // =============================
-
-        LocalDate hoy = LocalDate.now();
-
-        LocalDateTime inicioDia = hoy.atStartOfDay();
-        LocalDateTime finDia = hoy.atTime(17, 0);
-
-        Date desde = Date.from(inicioDia.atZone(ZoneId.systemDefault()).toInstant());
-        Date hasta = Date.from(finDia.atZone(ZoneId.systemDefault()).toInstant());
-
-        // =============================
-        // Consulta de pedidos
-        // =============================
-
-        List<Pedido> pedidos = em.createQuery(
-                        "SELECT p FROM Pedido p WHERE p.fHReserva BETWEEN :desde AND :hasta ORDER BY p.fHReserva",
-                        Pedido.class)
-                .setParameter("desde", desde)
-                .setParameter("hasta", hasta)
-                .getResultList();
+        List<Pedido> pedidos = pedidoService.listarPedidosDelDia();
 
         if (pedidos.isEmpty()) {
             System.out.println("No hay pedidos para hoy.");
             return;
         }
-
-        // =============================
-        // Mostrar pedidos
-        // =============================
 
         for (Pedido p : pedidos) {
             System.out.println("-----------------------------------");
@@ -362,27 +256,4 @@ public class DespensaliaSalon {
             }
         }
     }
-    // Crear el cliente "encargado" si no existe
-    private static void crearEncargadoSiNoExiste(EntityManager em) {
-
-        Cliente enc = em.find(Cliente.class, "encargado");
-
-        if (enc == null) {
-            Cliente encargado = new Cliente(
-                    "encargado",
-                    "1234",
-                    "Encargado",
-                    "Restaurante",
-                    "000000000",
-                    "encargado@local.com"
-            );
-
-            em.getTransaction().begin();
-            em.persist(encargado);
-            em.getTransaction().commit();
-
-            System.out.println("✔ Encargado creado automáticamente");
-        }
-    }
-
 }
