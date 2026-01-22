@@ -14,14 +14,6 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "tclientes")
-@NamedQueries({
-    @NamedQuery(name = "Cliente.findAll", query = "SELECT c FROM Cliente c"),
-    @NamedQuery(name = "Cliente.findByIdCliente", query = "SELECT c FROM Cliente c WHERE c.idCliente = :idCliente"),
-    @NamedQuery(name = "Cliente.findByPassword", query = "SELECT c FROM Cliente c WHERE c.password = :password"),
-    @NamedQuery(name = "Cliente.findByNombre", query = "SELECT c FROM Cliente c WHERE c.nombre = :nombre"),
-    @NamedQuery(name = "Cliente.findByApellidos", query = "SELECT c FROM Cliente c WHERE c.apellidos = :apellidos"),
-    @NamedQuery(name = "Cliente.findByTelefono", query = "SELECT c FROM Cliente c WHERE c.telefono = :telefono"),
-    @NamedQuery(name = "Cliente.findByEmail", query = "SELECT c FROM Cliente c WHERE c.email = :email")})
 public class Cliente implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,6 +45,7 @@ public class Cliente implements Serializable {
         this.idCliente = idCliente;
     }
 
+    /*
     public Cliente(String idCliente, String password, String nombre, String apellidos, String email) {
         this.idCliente = idCliente;
         this.password = password;
@@ -60,6 +53,18 @@ public class Cliente implements Serializable {
         this.apellidos = apellidos;
         this.email = email;
     }
+    */
+    public Cliente(String idCliente, String password, String nombre,
+                   String apellidos, String telefono, String email) {
+        this.idCliente = idCliente;
+        this.password = password;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+        this.telefono = telefono;
+        this.email = email;
+    }
+
+
 
     public String getIdCliente() {
         return idCliente;

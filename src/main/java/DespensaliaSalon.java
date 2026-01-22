@@ -12,6 +12,13 @@ import java.math.BigDecimal;
 import java.time.*;
 import java.util.Date;
 
+
+/*
+
+    IMPORTANTE, en el directorio resources/misql/esquemaDiego.sql tienes mi esquema
+
+*/
+
 public class DespensaliaSalon {
     public static void main(String[] args) {
 
@@ -24,28 +31,58 @@ public class DespensaliaSalon {
             em.getTransaction().begin();
 
             // ===== Cliente 1 =====
-            Cliente c1 = new Cliente();
-            c1.setIdCliente("Diego");
-            c1.setPassword("1234");
-            c1.setNombre("Diego");
-            c1.setApellidos("Carmona De Haro");
-            c1.setEmail("diego@email.com");
+            Cliente c1 = new Cliente(
+                    "diego01",
+                    "1234",
+                    "Diego",
+                    "Carmona De Haro",
+                    "600111222",
+                    "diego@email.com"
+            );
             em.persist(c1);
 
-            // ===== Cliente 2 =====
-            Cliente c2 = new Cliente("maria01", "abcd", "María", "López Pérez", "maria@email.com");
+// ===== Cliente 2 =====
+            Cliente c2 = new Cliente(
+                    "maria01",
+                    "abcd",
+                    "María",
+                    "López Pérez",
+                    "611222333",
+                    "maria@email.com"
+            );
             em.persist(c2);
 
-            // ===== Cliente 3 =====
-            Cliente c3 = new Cliente("juan01", "pass123", "Juan", "Martínez García", "juan@email.com");
+// ===== Cliente 3 =====
+            Cliente c3 = new Cliente(
+                    "juan01",
+                    "pass123",
+                    "Juan",
+                    "Martínez García",
+                    "622333444",
+                    "juan@email.com"
+            );
             em.persist(c3);
 
-            // ===== Cliente 4 =====
-            Cliente c4 = new Cliente("laura01", "xyz789", "Laura", "Fernández Ruiz", "laura@email.com");
+// ===== Cliente 4 =====
+            Cliente c4 = new Cliente(
+                    "laura01",
+                    "xyz789",
+                    "Laura",
+                    "Fernández Ruiz",
+                    "633444555",
+                    "laura@email.com"
+            );
             em.persist(c4);
 
-            // ===== Cliente 5 =====
-            Cliente c5 = new Cliente("pablo01", "qwerty", "Pablo", "Sánchez Díaz", "pablo@email.com");
+// ===== Cliente 5 =====
+            Cliente c5 = new Cliente(
+                    "pablo01",
+                    "qwerty",
+                    "Pablo",
+                    "Sánchez Díaz",
+                    "644555666",
+                    "pablo@email.com"
+            );
             em.persist(c5);
 
 

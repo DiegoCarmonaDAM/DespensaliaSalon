@@ -15,14 +15,6 @@ import jakarta.persistence.*;
  */
 @Entity
 @Table(name = "tproductos")
-@NamedQueries({
-    @NamedQuery(name = "Producto.findAll", query = "SELECT p FROM Producto p"),
-    @NamedQuery(name = "Producto.findByIdProducto", query = "SELECT p FROM Producto p WHERE p.idProducto = :idProducto"),
-    @NamedQuery(name = "Producto.findByNombre", query = "SELECT p FROM Producto p WHERE p.nombre = :nombre"),
-    @NamedQuery(name = "Producto.findByTipo", query = "SELECT p FROM Producto p WHERE p.tipo = :tipo"),
-    @NamedQuery(name = "Producto.findByDescripcion", query = "SELECT p FROM Producto p WHERE p.descripcion = :descripcion"),
-    @NamedQuery(name = "Producto.findByPrecio", query = "SELECT p FROM Producto p WHERE p.precio = :precio"),
-    @NamedQuery(name = "Producto.findByDisponible", query = "SELECT p FROM Producto p WHERE p.disponible = :disponible")})
 public class Producto implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -54,14 +46,6 @@ public class Producto implements Serializable {
 
     public Producto(Integer idProducto) {
         this.idProducto = idProducto;
-    }
-
-    public Producto(Integer idProducto, String nombre, String tipo, BigDecimal precio, short disponible) {
-        this.idProducto = idProducto;
-        this.nombre = nombre;
-        this.tipo = tipo;
-        this.precio = precio;
-        this.disponible = disponible;
     }
 
     public Producto(String nombre, String tipo, String descripcion, BigDecimal precio, short disponible) {
