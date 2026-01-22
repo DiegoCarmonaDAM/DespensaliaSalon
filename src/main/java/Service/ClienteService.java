@@ -19,6 +19,10 @@ public class ClienteService {
         if (existente != null) {
             throw new RuntimeException("Ya existe un cliente con ese ID.");
         }
+        // Verificar ID no vacío
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("El ID del cliente no puede estar vacío.");
+        }
 
         Cliente cliente = new Cliente(id, password, nombre, apellidos, telefono, email);
         clienteRepository.save(cliente);

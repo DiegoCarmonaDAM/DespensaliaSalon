@@ -162,6 +162,7 @@ public class Pedido implements Serializable {
 
     // Regla: ¿puede modificarse o cancelarse?
     // Hasta las 12:00 del día de la reserva
+    /*
     public boolean puedeModificarse() {
         LocalDateTime ahora = LocalDateTime.now();
 
@@ -173,7 +174,7 @@ public class Pedido implements Serializable {
 
         return ahora.isBefore(limite);
     }
-
+    */
 
 
     @Override

@@ -8,7 +8,7 @@
         <properties>
             <!-- Conexión MySQL -->
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/despensalia"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/despensaliasalon"/>
             <property name="jakarta.persistence.jdbc.user" value="root"/>
             <property name="jakarta.persistence.jdbc.password" value="ABC.123"/>
 

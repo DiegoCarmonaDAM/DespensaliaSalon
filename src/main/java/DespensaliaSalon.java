@@ -7,6 +7,14 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Scanner;
 
+
+/*
+    Mi esquema de sql esta en la ruta resources/esquemaDiego.sql
+
+    Puede que al ejecutar el programa por primera vez de errores si la base de datos no
+    ha sido creada previamente. No se el motivo.
+*/
+
 public class DespensaliaSalon {
     private static EntityManagerFactory emf =
             Persistence.createEntityManagerFactory("DespensaliaSalonPU");
