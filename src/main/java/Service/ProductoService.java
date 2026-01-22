@@ -8,10 +8,12 @@ import java.util.List;
 
 public class ProductoService {
     private ProductoRepository productoRepository;
+    private EntityManager em;
 
     public ProductoService(EntityManager em) {
         this.productoRepository = new ProductoRepository(em);
     }
+
 
     public Producto altaProducto(String nombre, String tipo, String descripcion,
                                  BigDecimal precio, short disponible) {
@@ -40,4 +42,8 @@ public class ProductoService {
     public Producto buscarProducto(int id) {
         return productoRepository.findById(id);
     }
+
+
+
+
 }

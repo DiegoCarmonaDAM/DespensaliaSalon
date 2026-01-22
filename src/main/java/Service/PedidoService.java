@@ -60,13 +60,16 @@ public class PedidoService {
 
     public List<Pedido> listarPedidosDelDia() {
         LocalDate hoy = LocalDate.now();
-        LocalDateTime inicioDia = hoy.atStartOfDay();
-        LocalDateTime finDia = hoy.atTime(17, 0);
 
-        Date desde = Date.from(inicioDia.atZone(ZoneId.systemDefault()).toInstant());
-        Date hasta = Date.from(finDia.atZone(ZoneId.systemDefault()).toInstant());
+        // Fijar horas específicas: desde las 12:00 hasta las 17:00
+        LocalDateTime desde = hoy.atTime(12, 0);  // 12:00
+        LocalDateTime hasta = hoy.atTime(17, 0);  // 17:00
 
-        return pedidoRepository.findByDateRange(desde, hasta);
+        // Convertir a Date (necesario para JPA)
+        Date fechaDesde = Date.from(desde.atZone(ZoneId.systemDefault()).toInstant());
+        Date fechaHasta = Date.from(hasta.atZone(ZoneId.systemDefault()).toInstant());
+
+        return pedidoRepository.findByDateRange(fechaDesde, fechaHasta);
     }
 
     public boolean validarAccesoEncargado(String id, String password) {
