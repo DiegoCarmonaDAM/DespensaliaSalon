@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class PedidoService {
     private PedidoRepository pedidoRepository;
@@ -41,6 +42,8 @@ public class PedidoService {
         // Crear pedido
         Pedido pedido = new Pedido(cliente, fhReserva, observaciones);
 
+
+
         return pedido;
     }
 
@@ -48,6 +51,11 @@ public class PedidoService {
         Producto producto = productoService.buscarProducto(idProducto);
         if (producto == null) {
             throw new RuntimeException("Producto no existe.");
+        }
+
+        // 🔴 NUEVA VALIDACIÓN
+        if (!producto.isDisponible()) {
+            throw new RuntimeException("El producto '" + producto.getNombre() + "' no está disponible.");
         }
 
         PedidoLinea linea = PedidoLinea.crearLinea(producto, cantidad);

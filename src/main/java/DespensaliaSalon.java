@@ -9,7 +9,7 @@ import java.util.Scanner;
 
 
 /*
-    Mi esquema de sql esta en la ruta resources/esquemaDiego.sql
+    Mi esquema de sql esta en la ruta resources/misql/esquemaDiego.sql
 
     Puede que al ejecutar el programa por primera vez de errores si la base de datos no
     ha sido creada previamente. No se el motivo.
